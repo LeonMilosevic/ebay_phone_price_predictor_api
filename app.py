@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 @app.route("/predict", methods=["POST"])
 def predict() -> str:
-    processed_input = helpers.process_input(request.data)
+    processed_input = helper_func.process_input(request.data)
     
     try:
         prediction = regressor.predict(processed_input)
