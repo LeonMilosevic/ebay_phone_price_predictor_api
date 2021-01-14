@@ -26,6 +26,22 @@ db_connection = db.database_connect(
 
 app = Flask(__name__)
 
+@app.route("/", methods=["GET"])
+def display() -> str:
+    if request.method == "GET":
+        cursor = db_connection.cursor()
+        try:
+            cursor.execute('SELECT * FROM predictions')
+            rows = cursor.fetchall()
+            print(rows)
+            results = [{"id": row[0], "brand": row[1], "ram": float(row[2]), "storage": float(row[3]), "processor": float(row[4]), "camera":float(row[5]), "condition":row[6], "evaluation": float(row[7])} for row in rows]
+            cursor.close()
+            return json.dumps({"success": results}), 200
+        except EnvironmentError as error:
+            cursor.close()
+            print(error)
+            return json.dumps({"error": "something went wront"}), 500
+
 @app.route("/predict", methods=["POST"])
 def predict() -> str:
     if request.method == "POST":
@@ -52,10 +68,9 @@ def predict() -> str:
                 '{float(prediction[0])}')
                 """)    
 
-
             db_connection.commit()
-        except EnvironmentError as error:
-            print(error)
+        except:
+            cursor.close()
             return json.dumps({"error": "please try again later"}), 500
         
         return json.dumps({"evaluation": float(prediction[0])}), 200
