@@ -31,15 +31,29 @@ def display() -> str:
     if request.method == "GET":
         cursor = db_connection.cursor()
         try:
-            cursor.execute('SELECT * FROM predictions')
+            cursor.execute(
+                '''
+                SELECT * 
+                FROM predictions
+                ORDER BY created_at DESC
+                LIMIT 10
+                ''')
             rows = cursor.fetchall()
-            print(rows)
-            results = [{"id": row[0], "brand": row[1], "ram": float(row[2]), "storage": float(row[3]), "processor": float(row[4]), "camera":float(row[5]), "condition":row[6], "evaluation": float(row[7])} for row in rows]
+            results = [
+                {"id": row[0],
+                "brand": row[1], 
+                "ram": float(row[2]), 
+                "storage": float(row[3]), 
+                "processor": float(row[4]), 
+                "camera":float(row[5]), 
+                "condition":row[6], 
+                "evaluation": float(row[7]), 
+                "dateCreated": str(row[8])} 
+                for row in rows]
             cursor.close()
             return json.dumps({"success": results}), 200
-        except EnvironmentError as error:
+        except:
             cursor.close()
-            print(error)
             return json.dumps({"error": "something went wront"}), 500
 
 @app.route("/predict", methods=["POST"])
@@ -55,7 +69,6 @@ def predict() -> str:
         try:
             cursor = db_connection.cursor()
             post_data = json.loads(request.data)
-
             cursor.execute(
                 f"""
                 INSERT INTO predictions(brand, ram, storage, processor, camera, condition, evaluation) 
