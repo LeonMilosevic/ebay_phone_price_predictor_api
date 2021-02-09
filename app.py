@@ -64,7 +64,7 @@ def predict() -> str:
         try:
             prediction = regressor.predict(processed_input)
         except:
-            return json.dumps({"error": "something went wrong, please try again"}), 500
+            return json.dumps({"error": "something went wrong with the model"}), 400
         
         try:
             cursor = db_connection.cursor()
@@ -84,7 +84,7 @@ def predict() -> str:
             db_connection.commit()
         except:
             cursor.close()
-            return json.dumps({"error": "please try again later"}), 500
+            return json.dumps({"error": "there was a problem with the database"}), 500
         
         return json.dumps({"evaluation": float(prediction[0])}), 200
 
