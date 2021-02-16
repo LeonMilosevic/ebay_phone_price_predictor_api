@@ -1,10 +1,10 @@
 import numpy as np
 import json
 
-def clean_input(input: str) -> list:
+def process_input(input: str) -> list:
     """[extracts the json from the input,
         prepares the data as it is needed for the model to accept it,
-        returns a list of float numbers to be evaluated by the model]
+        returns a np.array of float numbers to be evaluated by the model]
 
     Args:
         input (str): [JSON object from the post request]
@@ -44,17 +44,33 @@ def clean_input(input: str) -> list:
         condition_new = 0
         condition_used = 1
 
-    return [ram, storage, processor, camera, brand_apple, brand_huawei, brand_samsung, condition_new, condition_used]
+    return np.asarray([ram, storage, processor, camera, brand_apple, brand_huawei, brand_samsung, condition_new, condition_used])
 
-def process_input(input: str) -> np.array:
-    """[passed the input to the clean_input function, returns np array for the model]
+def get_results(cursor):
 
-    Args:
-        input (str): [JSON object from the post request]
+    cursor.execute(
 
-    Returns:
-        np.array: [used by model to predict prices]
-    """
-    cleaned_input = clean_input(input)
+        '''
+        SELECT * 
+        FROM predictions
+        ORDER BY created_at DESC
+        LIMIT 10
+        ''')
 
-    return np.asarray([cleaned_input])
+    rows = cursor.fetchall()
+    
+    results = [
+        {
+            "id": row[0],
+            "brand": row[1], 
+            "ram": float(row[2]), 
+            "storage": float(row[3]), 
+            "processor": float(row[4]), 
+            "camera":float(row[5]), 
+            "condition":row[6], 
+            "evaluation": float(row[7]), 
+            "dateCreated": str(row[8])
+        } 
+        for row in rows]
+        
+    return results

@@ -3,7 +3,6 @@ import json
 from flask import Flask, request
 from decouple import config
 from helpers import helper_func
-from db import db
 import psycopg2
 
 # secrets
@@ -17,7 +16,7 @@ APP_PORT = config('APP_PORT')
 # load model from the file
 regressor = pickle.load(open(APP_MODEL_PATH, "rb"))
 
-db_connection = db.database_connect(
+db_connection = psycopg2.connect(
     database=APP_DATABASE,
     user=APP_USER, 
     password=APP_PASSWORD, 
@@ -31,25 +30,7 @@ def display() -> str:
     if request.method == "GET":
         cursor = db_connection.cursor()
         try:
-            cursor.execute(
-                '''
-                SELECT * 
-                FROM predictions
-                ORDER BY created_at DESC
-                LIMIT 10
-                ''')
-            rows = cursor.fetchall()
-            results = [
-                {"id": row[0],
-                "brand": row[1], 
-                "ram": float(row[2]), 
-                "storage": float(row[3]), 
-                "processor": float(row[4]), 
-                "camera":float(row[5]), 
-                "condition":row[6], 
-                "evaluation": float(row[7]), 
-                "dateCreated": str(row[8])} 
-                for row in rows]
+            results = helper_functions.get_results(cursor)
             cursor.close()
             return json.dumps({"success": results}), 200
         except:
@@ -59,12 +40,15 @@ def display() -> str:
 @app.route("/predict", methods=["POST"])
 def predict() -> str:
     if request.method == "POST":
-        processed_input = helper_func.process_input(request.data)
+        try:
+            processed_input = helper_functions.process_input(request.data)
+        except:
+            return json.dumps({"error": "Please provide correct input"}), 500
 
         try:
             prediction = regressor.predict(processed_input)
         except:
-            return json.dumps({"error": "something went wrong with the model"}), 400
+            return json.dumps({"error": "something went wrong with the model"}), 500
         
         try:
             cursor = db_connection.cursor()
@@ -86,7 +70,7 @@ def predict() -> str:
             cursor.close()
             return json.dumps({"error": "there was a problem with the database"}), 500
         
-        return json.dumps({"evaluation": float(prediction[0])}), 200
+        return json.dumps({"price": float(prediction[0])}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
