@@ -4,4 +4,4 @@ data/
 .vscode
 __pycache__/
 Procfile
-regressor.pkl
+model/

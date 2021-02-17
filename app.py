@@ -2,8 +2,9 @@ import pickle
 import json
 from flask import Flask, request
 from decouple import config
-from helpers import helper_func
+from helpers import helper_functions
 import psycopg2
+import logging
 
 # secrets
 APP_MODEL_PATH = config("APP_MODEL_PATH")
@@ -14,7 +15,7 @@ APP_HOST = config('APP_HOST')
 APP_PORT = config('APP_PORT')
 
 # load model from the file
-regressor = pickle.load(open(APP_MODEL_PATH, "rb"))
+pipe = pickle.load(open(APP_MODEL_PATH, "rb"))
 
 db_connection = psycopg2.connect(
     database=APP_DATABASE,
@@ -46,7 +47,7 @@ def predict() -> str:
             return json.dumps({"error": "Please provide correct input"}), 500
 
         try:
-            prediction = regressor.predict(processed_input)
+            prediction = pipe.predict(processed_input)
         except:
             return json.dumps({"error": "something went wrong with the model"}), 500
         
@@ -66,9 +67,9 @@ def predict() -> str:
                 """)    
 
             db_connection.commit()
-        except:
+        except Exception as e:
             cursor.close()
-            return json.dumps({"error": "there was a problem with the database"}), 500
+            logging.warning(e)
         
         return json.dumps({"price": float(prediction[0])}), 200
 

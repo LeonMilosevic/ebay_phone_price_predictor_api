@@ -30,4 +30,4 @@ Send a json POST request to https://phone-evaluator.herokuapp.com/predict
 
 returns:
 
-{"evaluation": 1112.726956521739}
+{"price": 1112.726956521739}
