@@ -8,8 +8,6 @@ API that will help you evaluate the price of your phone based on given features.
 
 ### How to use it?
 
-Install prerequisites from requirements.txt
-
 Send a json POST request to https://phone-evaluator.herokuapp.com/predict
 
 ```JSON
