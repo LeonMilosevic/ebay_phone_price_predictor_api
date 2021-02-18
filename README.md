@@ -6,28 +6,24 @@ FLASK API to help you evaluate your phones price before putting it for sale on E
 
 API that will help you evaluate the price of your phone based on given features.
 
-### Technologies used
-- Python
-- JSON
-- Numpy
-- decouple
-- Pickle
-- SKlearn
-- DecissionTreeRegressor
-
 ### How to use it?
+
+Install prerequisites from requirements.txt
 
 Send a json POST request to https://phone-evaluator.herokuapp.com/predict
 
-{\
-    "ram": 4.0,\
-    "storage": 256.0,\
-    "processor": 3.0,\
-    "camera": 12.0,\
-    "brand": "apple",\
-    "condition": "used"\
+```JSON
+{
+    "ram": 4.0,
+    "storage": 256.0,
+    "processor": 3.0,
+    "camera": 12.0,
+    "brand": "apple",
+    "condition": "used"
 }
-
+```
 returns:
 
+```JSON
 {"price": 1112.726956521739}
+```
